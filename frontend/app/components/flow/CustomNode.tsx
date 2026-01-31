@@ -89,6 +89,17 @@ export const CustomNode = ({ id, data }: { id: string, data: any }) => {
                 onChange={(e) => handleChange('amount', e.target.value)}
              />
            </div>
+           
+           <div className="flex gap-2 items-center pt-1 border-t border-stone-700 mt-1">
+             <span className="text-[10px] text-stone-400 font-mono w-8">To:</span>
+             <input 
+                type="text"
+                className="nodrag flex-1 bg-stone-800 border border-stone-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-blue-500 font-mono placeholder-stone-600"
+                placeholder="0x...Address"
+                value={data.recipient || ""}
+                onChange={(e) => handleChange('recipient', e.target.value)}
+             />
+           </div>
         </div>
       )}
 
