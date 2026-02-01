@@ -64,7 +64,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
   onNodesChange: (changes) => {
     set({
-      nodes: applyNodeChanges(changes, get().nodes),
+      nodes: applyNodeChanges(changes, get().nodes) as FlowNode[],
     });
   },
   onEdgesChange: (changes) => {

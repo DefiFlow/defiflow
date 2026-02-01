@@ -25,10 +25,10 @@ export const SuccessModal = () => {
   }, [txHash]);
 
   // Get details from the action node to display on receipt
-  const actionNode = nodes.find(n => n.data.type === 'action');
-  const amount = (actionNode?.data.amount as string) || '0.0001';
-  const fromToken = (actionNode?.data.fromToken as string) || 'ETH';
-  const toToken = (actionNode?.data.toToken as string) || 'UNI';
+  const actionNode = nodes.find(n => (n.data as any)?.type === 'action');
+  const amount = ((actionNode?.data as any)?.amount as string) || '0.0001';
+  const fromToken = ((actionNode?.data as any)?.fromToken as string) || 'ETH';
+  const toToken = ((actionNode?.data as any)?.toToken as string) || 'UNI';
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">

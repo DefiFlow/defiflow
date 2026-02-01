@@ -82,9 +82,9 @@ const FlowArea = () => {
                   toToken: 'UNI',
                   amountType: 'percentage',
                   amount: ''
-              } as any,
+              },
             };
-      setNodes(nodes.concat(newNode));
+      setNodes(nodes.concat(newNode as any));
     },
     [screenToFlowPosition, setNodes, nodes],
   );
