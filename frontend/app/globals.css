@@ -56,5 +56,35 @@ body {
 /* ReactFlow Edge gradient styling */
 .react-flow__edge-path {
   stroke: url(#edge-gradient) !important;
-  stroke-width: 2 !important;
+  stroke-width: 3 !important;
+}
+
+/* Custom Animations */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes text-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
+
+.animate-text-shimmer {
+  animation: text-shimmer 2.5s ease-out 1 forwards;
+  background-size: 250% 100%;
 }

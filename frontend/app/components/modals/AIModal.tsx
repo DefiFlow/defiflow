@@ -31,7 +31,7 @@ export const AIModal = () => {
             const result = await analyzeIntent(intent);
 
             if (result && !result.error) {
-                // Typewriter effect for thoughts (Step 0)
+                // Display thoughts without typewriter effect (Step 0)
                 const rawThoughts = result.thought || "Processing request...";
                 const sentences = rawThoughts.match(/[^.!?]+[.!?]+/g) || [rawThoughts];
 
@@ -39,18 +39,10 @@ export const AIModal = () => {
                     const text = sentence.trim();
                     if (!text) continue;
 
-                    // Type in
-                    for (let i = 0; i <= text.length; i++) {
-                        setThoughtText(text.slice(0, i));
-                        await new Promise(r => setTimeout(r, 30));
-                    }
-                    await new Promise(r => setTimeout(r, 1000)); // Read delay
-
-                    // Delete out
-                    for (let i = text.length; i >= 0; i--) {
-                        setThoughtText(text.slice(0, i));
-                        await new Promise(r => setTimeout(r, 10));
-                    }
+                    // Directly set thought text to trigger fade-in-up animation
+                    setThoughtText(text);
+                    // Wait for reading - giving enough time to admire the animation
+                    await new Promise(r => setTimeout(r, 2500));
                 }
 
                 // Proceed to next steps
@@ -126,7 +118,6 @@ export const AIModal = () => {
             target: actionId,
             animated: true,
             style: { stroke: '#3b82f6', strokeWidth: 2 },
-            markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' },
         };
         edgesToAdd.push(edge1);
 
@@ -151,7 +142,6 @@ export const AIModal = () => {
                 target: transferId,
                 animated: true,
                 style: { stroke: '#3b82f6', strokeWidth: 2 },
-                markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' },
             };
             edgesToAdd.push(edge2);
         }
@@ -182,8 +172,8 @@ export const AIModal = () => {
                             <div key={i} className="flex flex-col gap-1">
                                 <div className="flex items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-500">
                                     <div className={`p-1 rounded-full transition-colors duration-300 ${i < step ? 'bg-green-100 text-green-600' :
-                                            i === step ? 'bg-white/30 text-white' :
-                                                'bg-white/10 text-white/40'
+                                        i === step ? 'bg-white/30 text-white' :
+                                            'bg-white/10 text-white/40'
                                         }`}>
                                         {i < step ? <Check className="w-4 h-4" /> :
                                             i === step ? <Loader2 className="w-4 h-4 animate-spin" /> :
@@ -192,12 +182,19 @@ export const AIModal = () => {
                                     <span className={`text-sm transition-colors duration-300 ${i <= step ? 'text-white font-medium' : 'text-white/50'
                                         }`}>{s}</span>
                                 </div>
-                                {/* Typewriter area for Step 0 */}
+                                {/* Gemini-style Thought Display (Step 0) */}
                                 {i === 0 && step === 0 && (
-                                    <div className="ml-9 min-h-[3rem] text-xs text-white/80 font-mono leading-relaxed relative">
-                                        <span className="text-white mr-1 font-bold">AI:</span>
-                                        {thoughtText}
-                                        <span className="animate-pulse inline-block w-1.5 h-3 bg-white/60 ml-1 align-middle"></span>
+                                    <div className="ml-9 min-h-[3rem] relative overflow-hidden">
+                                        <div key={thoughtText} className="text-xs font-mono leading-relaxed animate-in slide-in-from-bottom-2 duration-500 fill-mode-forwards">
+                                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-white font-bold mr-2">AI:</span>
+                                            <span
+                                                className="bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-transparent animate-text-shimmer"
+                                            >
+                                                {thoughtText}
+                                            </span>
+                                        </div>
+                                        {/* Gemini-style shimmering loading bar */}
+                                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent opacity-50 animate-shimmer" style={{ backgroundSize: '200% 100%' }}></div>
                                     </div>
                                 )}
                             </div>
