@@ -124,7 +124,7 @@ export const CustomNode = ({ id, data }: { id: string, data: any }) => {
             <div className="flex items-center gap-2">
               <span className="text-xs text-stone-200 font-mono">ETH</span>
               <ArrowRight className="w-3 h-3 text-stone-600" />
-              <span className="text-xs text-stone-200 font-mono">UNI</span>
+              <span className="text-xs text-stone-200 font-mono">USDC</span>
             </div>
           </div>
 
