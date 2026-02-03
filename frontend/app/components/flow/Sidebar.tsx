@@ -49,19 +49,19 @@ export const Sidebar = () => {
         <MousePointer2 className="w-4 h-4 text-[#FF5D73] ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
 
-      {/* Trigger 组件 */}
+      {/* LI.FI Bridge Component (formerly Trigger) */}
       <div
         className="p-3 border border-[#2A2B32] rounded-xl cursor-grab flex items-center gap-3 transition-all select-none active:cursor-grabbing group shadow-sm hover:border-[#52BDFF] hover:scale-[1.02]"
         style={{ background: 'linear-gradient(90deg, #2B4572 0%, #1B1D1F 100%)' }}
-        onDragStart={(event) => onDragStart(event, 'trigger', 'Price Monitor')}
+        onDragStart={(event) => onDragStart(event, 'lifi', 'LI.FI Bridge')} // Changed type to 'lifi' and label
         draggable
       >
         <div className="bg-blue-500/20 p-2 rounded-lg text-[#52BDFF] group-hover:bg-[#52BDFF] group-hover:text-white transition-all shadow-sm">
           <Zap className="w-5 h-5" />
         </div>
         <div className="flex flex-col">
-          <span className="font-bold text-sm text-white transition-colors">Price Trigger</span>
-          <span className="text-[10px] text-stone-400 group-hover:text-blue-100 transition-colors">Monitors ETH price</span>
+          <span className="font-bold text-sm text-white transition-colors">LI.FI Bridge</span> {/* Changed label */}
+          <span className="text-[10px] text-stone-400 group-hover:text-blue-100 transition-colors">Cross-chain asset transfer</span> {/* Updated description */}
         </div>
         <MousePointer2 className="w-4 h-4 text-[#52BDFF] ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>

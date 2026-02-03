@@ -40,7 +40,6 @@ const FlowArea = () => {
     onEdgesChange,
     onConnect,
     setNodes,
-    currentPrice,
     isRunning,
     setIsRunning,
     showSuccessModal,
@@ -78,10 +77,12 @@ const FlowArea = () => {
           type,
           operator: '>',
           threshold: '',
-          fromToken: 'ETH',
+          fromToken: 'USDC',
           toToken: 'UNI',
           amountType: 'percentage',
-          amount: ''
+          amount: '',
+          recipientInput: type === 'transfer' ? 'vitalik.eth' : '', // Initialize with ENS for demo
+          memo: type === 'transfer' ? 'Feb 2026 Salary' : '' // Initialize memo for demo
         },
       };
       setNodes(nodes.concat(newNode as any));
@@ -151,7 +152,7 @@ const FlowArea = () => {
               className="!rounded-xl !shadow-2xl !m-4 !bg-[#1A1D24] !border-0"
               maskColor="rgba(0, 0, 0, 0)"
               nodeColor={(n) => {
-                if (n.data.type === 'trigger') return '#52BDFF';
+                if (n.data.type === 'lifi') return '#52BDFF'; // Updated to 'lifi'
                 if (n.data.type === 'action') return '#FF5D73';
                 if (n.data.type === 'transfer') return '#41E43E';
                 return '#6b7280';

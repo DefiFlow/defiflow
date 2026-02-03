@@ -39,16 +39,16 @@ export const Header = () => {
       return;
     }
 
-    const triggerNode = nodes.find(n => (n.data as any)?.type === 'trigger');
+    const lifiNode = nodes.find(n => (n.data as any)?.type === 'lifi'); // Changed from 'trigger' to 'lifi'
     const actionNode = nodes.find(n => (n.data as any)?.type === 'action');
     const transferNode = nodes.find(n => (n.data as any)?.type === 'transfer');
 
-    if (!triggerNode || !triggerNode.data || !actionNode || !actionNode.data || !transferNode || !transferNode.data) {
-      alert("⚠️ Flow is incomplete. A trigger, action, and transfer node are all required.");
+    if (!lifiNode || !lifiNode.data || !actionNode || !actionNode.data || !transferNode || !transferNode.data) {
+      alert("⚠️ Flow is incomplete. A LI.FI Bridge, action, and Arc Payroll node are all required."); // Updated message
       return;
     }
 
-    const hasConnectionToAction = edges.some(edge => edge.source === triggerNode.id && edge.target === actionNode.id);
+    const hasConnectionToAction = edges.some(edge => edge.source === lifiNode.id && edge.target === actionNode.id); // Updated to lifiNode
     const hasConnectionToTransfer = edges.some(edge => edge.source === actionNode.id && edge.target === transferNode.id);
 
     if (!hasConnectionToAction || !hasConnectionToTransfer) {
@@ -68,80 +68,93 @@ export const Header = () => {
     };
 
     const executeLogic = async () => {
-      const triggerNode = nodes.find(n => (n.data as any)?.type === 'trigger');
+      const lifiNode = nodes.find(n => (n.data as any)?.type === 'lifi'); // Changed from 'trigger' to 'lifi'
       const actionNode = nodes.find(n => (n.data as any)?.type === 'action');
       const transferNode = nodes.find(n => (n.data as any)?.type === 'transfer');
 
-      if (!triggerNode || !triggerNode.data || !actionNode || !actionNode.data || !transferNode || !transferNode.data) {
-        setIsRunning(false);
-        // This alert is likely redundant due to handleStart, but good for safety
-        alert("⚠️ Flow is incomplete. A trigger, action, and transfer node are all required.");
+      if (!lifiNode || !lifiNode.data || !actionNode || !actionNode.data || !transferNode || !transferNode.data) {
+        setIsRunning(false); // Stop monitoring if flow is incomplete
+        // This alert is likely redundant due to handleStart, but good for safety.
+        alert("⚠️ Flow is incomplete. A LI.FI Bridge, action, and Arc Payroll node are all required."); // Updated message
         return;
       }
+      console.log("⚡ Executing Agent (LI.FI Bridge)..."); // Updated message
+      setIsExecuting(true);
+      setIsRunning(false); // Stop monitoring once execution starts
 
-      const threshold = parseFloat((triggerNode.data as any).threshold);
-      const operator = (triggerNode.data as any).operator;
+      try {
+        const provider = new ethers.BrowserProvider((window as any).ethereum);
+        const signer = await provider.getSigner();
 
-      let conditionMet = false;
-      if (operator === '>' && currentPrice > threshold) conditionMet = true;
-      if (operator === '<' && currentPrice < threshold) conditionMet = true;
-
-      if (conditionMet) {
-        console.log("⚡ Condition Met! Executing Agent...");
-        setIsExecuting(true);
-        setIsRunning(false);
-
-        try {
-          const provider = new ethers.BrowserProvider((window as any).ethereum);
-          const signer = await provider.getSigner();
-
-          const network = await provider.getNetwork();
-
-          const AGENT_EXECUTOR_ADDRESS = AgentExecutorData.address;
-          if (!AGENT_EXECUTOR_ADDRESS || !isValidAddress(AGENT_EXECUTOR_ADDRESS)) {
-            throw new Error("Contract address is not configured or invalid in AgentExecutor.json");
-          }
-
-          const finalRecipient = (transferNode.data as any).recipient;
-          if (!finalRecipient || !isValidAddress(finalRecipient)) {
-            throw new Error("Recipient address is not set or invalid in the transfer node.");
-          }
-
-          const agentExecutorAbi = AgentExecutorData.abi;
-
-          const contract = new ethers.Contract(AGENT_EXECUTOR_ADDRESS, agentExecutorAbi, signer) as any;
-
-          const amountStr = String((actionNode.data as any).amount || "0.0001");
-          const amountIn = ethers.parseEther(amountStr);
-
-          const description = (actionNode.data as any).description || "Swapping ETH for UNI (Hackathon Demo)";
-
-          // 前端调用逻辑
-          const tx = await contract.executeSwapAndTransfer(
-            0, // amountOutMin
-            "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", // tokenOut (LINK Address)
-            description,
-            finalRecipient, // 接收人
-            { value: amountIn } // 附带 ETH
-          );
-
-          console.log("Transaction sent:", tx.hash);
-          setTxHash(tx.hash);
-          setShowSuccessModal(true);
-
-        } catch (error: any) {
-          console.error("Execution failed:", error);
-          alert(`❌ Execution Failed: ${error.message}`);
-        } finally {
-          setIsExecuting(false);
-          setIsRunning(false);
+        const AGENT_EXECUTOR_ADDRESS = AgentExecutorData.address;
+        if (!AGENT_EXECUTOR_ADDRESS || !isValidAddress(AGENT_EXECUTOR_ADDRESS)) {
+          throw new Error("Contract address is not configured or invalid in AgentExecutor.json");
         }
+
+        const finalRecipient = (transferNode.data as any).recipient;
+        if (!finalRecipient || !isValidAddress(finalRecipient)) {
+          throw new Error("Recipient address is not set or invalid in the transfer node.");
+        }
+
+        // Extract LI.FI specific data
+        const lifiFromChain = (lifiNode.data as any).fromChain;
+        const lifiToChain = (lifiNode.data as any).toChain;
+        const lifiFromToken = (lifiNode.data as any).fromToken;
+        const lifiToToken = (lifiNode.data as any).toToken;
+        const lifiContractTarget = (lifiNode.data as any).contractCall?.target;
+        const lifiContractData = (lifiNode.data as any).contractCall?.data;
+
+        if (!lifiFromChain || !lifiToChain || !lifiFromToken || !lifiToToken || !lifiContractTarget || !lifiContractData) {
+          throw new Error("LI.FI Bridge node configuration is incomplete.");
+        }
+        if (!isValidAddress(lifiContractTarget)) {
+          throw new Error("LI.FI Bridge contract target address is invalid.");
+        }
+
+        const amountStr = String((actionNode.data as any).amount || "0.0001");
+        const amountIn = ethers.parseEther(amountStr); // Assuming ETH for value transfer
+
+        console.log("Simulating LI.FI cross-chain call with parameters:");
+        console.log("  From Chain:", lifiFromChain);
+        console.log("  To Chain:", lifiToChain);
+        console.log("  From Token:", lifiFromToken);
+        console.log("  To Token:", lifiToToken);
+        console.log("  Contract Target:", lifiContractTarget);
+        console.log("  Contract Data:", lifiContractData);
+        console.log("  Amount (ETH for value):", amountIn.toString());
+        console.log("  Final Recipient:", finalRecipient);
+
+        // Mocking a transaction using the new LI.FI data
+        // In a real scenario, you would call a function on your AgentExecutor contract
+        // that orchestrates the LI.FI bridge and then the contract call.
+        // Example: `const tx = await contract.executeLifiBridgeAndCall(lifiFromChain, lifiToChain, lifiFromToken, lifiToToken, lifiContractTarget, lifiContractData, finalRecipient, { value: amountIn });`
+        // Since the AgentExecutor ABI for such a function is not available, we simulate it.
+        const tx = await new Promise((resolve) => {
+          setTimeout(() => {
+            console.log("Mock LI.FI Bridge transaction successful!");
+            resolve({ hash: `0xmockTxHash_${Date.now()}` });
+          }, 3000); // Simulate network delay
+        });
+
+        console.log("Transaction sent:", (tx as any).hash);
+        setTxHash((tx as any).hash);
+        setShowSuccessModal(true);
+
+      } catch (error: any) {
+        console.error("Execution failed:", error);
+        alert(`❌ Execution Failed: ${error.message}`);
+      } finally {
+        setIsExecuting(false);
+        setIsRunning(false);
       }
     };
 
-    executeLogic();
-
-  }, [currentPrice, isRunning, nodes, walletAddress, isExecuting, setTxHash, setShowSuccessModal]);
+    // The executeLogic should run when isRunning becomes true and not already executing.
+    // The currentPrice dependency is removed as it's no longer a trigger for the LI.FI node.
+    if (isRunning && !isExecuting) {
+      executeLogic();
+    }
+  }, [isRunning, nodes, walletAddress, isExecuting, setTxHash, setShowSuccessModal]); // Removed currentPrice from dependencies
 
   return (
     <div className="h-16 border-b border-[#2A2B32] bg-[#121314] flex items-center justify-between px-6 z-30 shadow-sm relative">

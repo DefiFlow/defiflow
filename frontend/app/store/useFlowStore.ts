@@ -11,11 +11,46 @@ import {
   addEdge,
 } from '@xyflow/react';
 
+export type Recipient = {
+  address: string;
+  amount: string | number;
+  input?: string;
+};
+
 export type NodeData = {
   label: string;
+  type?: 'lifi' | 'action' | 'transfer';
+  active?: boolean;
+
+  // Uniswap
+  input?: string;
+  output?: string;
+  amount?: string | number;
+  amountType?: string;
+
+  // LI.FI
+  fromChain?: string;
+  toChain?: string;
+  token?: string;
+  bridge?: string;
+  payload?: string;
+
+  // Arc Payroll
+  recipients?: Recipient[];
+  memo?: string;
+
+  // Legacy / Other
   value?: number;
   percentage?: number;
   address?: string;
+  fromToken?: string;
+  toToken?: string;
+  contractCall?: {
+    target: string;
+    data: string;
+  };
+  target?: string;
+  data?: string;
 };
 
 export type FlowNode = Node<NodeData>;
@@ -97,4 +132,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     });
   },
   resetFlow: () => set({ nodes: [], edges: [] }),
+}));
+
+export const usePriceStore = create((set) => ({
+  currentPrice: 0,
 }));
