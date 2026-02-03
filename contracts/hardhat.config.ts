@@ -9,9 +9,6 @@ const config: HardhatUserConfig = {
   solidity: "0.8.20",
   networks: {
     hardhat: {
-      forking: {
-        url: `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
-      },
     },
     localhost: {
       url: "http://127.0.0.1:8545",
