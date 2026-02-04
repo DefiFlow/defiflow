@@ -1,7 +1,7 @@
 // app/components/flow/CustomNode.tsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { Handle, Position, useReactFlow } from '@xyflow/react';
-import { Repeat, ArrowRight, CheckCircle, Wallet, Loader2, Plus, Trash2, Search } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Handle, Position, useReactFlow, useNodes, useEdges } from '@xyflow/react';
+import { Repeat, ArrowRight, CheckCircle, Wallet, Loader2, Search } from 'lucide-react';
 import { ethers } from 'ethers';
 import { useFlowStore } from '../../store/useFlowStore';
 
@@ -20,13 +20,11 @@ const getEnsProvider = () => {
 const RecipientRow = ({
   index,
   recipient,
-  onChange,
-  onRemove
+  onChange
 }: {
   index: number;
-  recipient: { address: string; amount: number; input?: string };
+  recipient: { address: string; amount: string | number; input?: string };
   onChange: (index: number, field: string, value: any) => void;
-  onRemove: (index: number) => void;
 }) => {
   const [localInput, setLocalInput] = useState(recipient.input || recipient.address || '');
   const [isResolving, setIsResolving] = useState(false);
@@ -99,18 +97,15 @@ const RecipientRow = ({
         value={recipient.amount || ''}
         onChange={(e) => onChange(index, 'amount', e.target.value)}
       />
-      <button
-        onClick={() => onRemove(index)}
-        className="p-1.5 rounded-lg text-stone-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover/row:opacity-100"
-      >
-        <Trash2 className="w-3 h-3" />
-      </button>
+      <div className="w-6" /> {/* Spacer to maintain alignment */}
     </div>
   );
 };
 
 export const CustomNode = ({ id, data }: { id: string, data: any }) => {
   const { updateNodeData } = useReactFlow();
+  const nodes = useNodes();
+  const edges = useEdges();
   const currentPrice = useFlowStore((state) => state.currentPrice);
 
   useEffect(() => {
@@ -124,22 +119,22 @@ export const CustomNode = ({ id, data }: { id: string, data: any }) => {
     }
   }, [data.input, currentPrice, data.type, id, updateNodeData, data.output]);
 
+  const parentEnsNodeRecipient = useMemo(() => {
+    if (data.type !== 'transfer') return null;
+    const incomingEdge = edges.find(edge => edge.target === id);
+    if (!incomingEdge) return null;
+    const parentNode = nodes.find(node => node.id === incomingEdge.source);
+    if (!parentNode || parentNode.data.type !== 'ens' || !Array.isArray(parentNode.data.recipients) || parentNode.data.recipients.length === 0) {
+      return null;
+    }
+    return parentNode.data.recipients[0];
+  }, [id, data.type, nodes, edges]);
+
   const handleChange = (field: string, value: string) => {
     updateNodeData(id, { ...data, [field]: value });
   };
 
-  const recipients = data.recipients || [];
-
-  const addRecipient = useCallback(() => {
-    if (recipients.length >= 5) return;
-    const newRecipients = [...recipients, { address: '', amount: 0, input: '' }];
-    updateNodeData(id, { ...data, recipients: newRecipients });
-  }, [id, data, recipients, updateNodeData]);
-
-  const removeRecipient = useCallback((index: number) => {
-    const newRecipients = recipients.filter((_: any, i: number) => i !== index);
-    updateNodeData(id, { ...data, recipients: newRecipients });
-  }, [id, data, recipients, updateNodeData]);
+  const recipients = Array.isArray(data.recipients) ? data.recipients : [];
 
   const updateRecipient = useCallback((index: number, field: string, value: any) => {
     const newRecipients = [...recipients];
@@ -207,7 +202,7 @@ export const CustomNode = ({ id, data }: { id: string, data: any }) => {
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between px-1">
-              <label className="text-[10px] font-bold text-stone-500 uppercase tracking-tighter">ENS List ({recipients.length}/5)</label>
+              <label className="text-[10px] font-bold text-stone-500 uppercase tracking-tighter">ENS to Resolve</label>
             </div>
             
             <div className="flex flex-col gap-2">
@@ -217,20 +212,9 @@ export const CustomNode = ({ id, data }: { id: string, data: any }) => {
                   index={i}
                   recipient={r}
                   onChange={updateRecipient}
-                  onRemove={removeRecipient}
                 />
               ))}
             </div>
-
-            {recipients.length < 5 && (
-              <button
-                onClick={addRecipient}
-                className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg border border-dashed border-stone-700 text-[10px] text-stone-400 hover:text-white hover:border-stone-500 hover:bg-white/5 transition-all mt-1"
-              >
-                <Plus className="w-3 h-3" />
-                Add ENS
-              </button>
-            )}
           </div>
         </div>
       ) : data.type === 'action' ? (
@@ -259,13 +243,30 @@ export const CustomNode = ({ id, data }: { id: string, data: any }) => {
       ) : (
         /* Transfer Node UI */
         <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
+          {parentEnsNodeRecipient ? (
+            <div className="p-3 bg-white/5 rounded-lg border border-stone-700/50 space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-stone-400">Recipient</span>
+                <span className="font-mono text-xs text-white break-all">{parentEnsNodeRecipient.input || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-stone-400">Amount</span>
+                <span className="font-mono text-xs text-white">{parentEnsNodeRecipient.amount} USDC</span>
+              </div>
+              {parentEnsNodeRecipient.address && (
+                <div className="flex justify-between items-start pt-2 mt-1 border-t border-stone-700/50">
+                  <span className="text-[10px] text-stone-400 mt-0.5">Resolved Address</span>
+                  <span className="font-mono text-xs text-green-400 text-right break-all">{parentEnsNodeRecipient.address}</span>
+                </div>
+              )}
+            </div>
+          ) : (
             <div className="p-3 bg-white/5 rounded-lg border border-stone-700/50">
               <p className="text-[10px] text-stone-400 leading-relaxed">
-                <span className="text-green-400 font-bold">Linked:</span> Executing payroll for addresses resolved in the ENS node.
+                <span className="text-yellow-400 font-bold">Unlinked:</span> Connect to an ENS Resolver node.
               </p>
             </div>
-          </div>
+          )}
 
           <div className="flex flex-col gap-2">
             <label className="text-[10px] font-bold text-stone-500 uppercase tracking-tighter">Memo</label>
