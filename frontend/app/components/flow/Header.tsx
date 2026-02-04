@@ -96,10 +96,11 @@ export const Header = () => {
     // Uniswap -> type: 'action'
     // Payroll -> type: 'transfer'
     const actionNode = nodes.find(n => n.type === 'action' || n.data?.type === 'action');
+    const ensNode = nodes.find(n => n.type === 'ens' || n.data?.type === 'ens');
     const transferNode = nodes.find(n => n.type === 'transfer' || n.data?.type === 'transfer');
 
-    if (!actionNode || !transferNode) {
-      alert("⚠️ Flow incomplete. Please create a flow with Action (Uniswap) and Transfer (Payroll) nodes.");
+    if (!actionNode || !ensNode || !transferNode) {
+      alert("⚠️ Flow incomplete. Please create a flow with Action (Uniswap), ENS, and Transfer (Payroll) nodes.");
       return;
     }
 
@@ -111,7 +112,7 @@ export const Header = () => {
       const signer = await provider.getSigner();
 
       // ======================================================
-      // PHASE 1: Sepolia (Visual Simulation - Swap & Bridge)
+      // PHASE 1: Sepolia (Visual Simulation - Swap)
       // ======================================================
       setStatus('1/3: Swapping ETH on Sepolia via Uniswap v4...');
       await switchNetwork(CHAINS.SEPOLIA.id, CHAINS.SEPOLIA.name, CHAINS.SEPOLIA.rpc);
@@ -130,7 +131,7 @@ export const Header = () => {
         value: ethers.parseEther(ethAmount) 
       });
       
-      setStatus('2/3: Bridging assets via LI.FI (Circle CCTP)...');
+      setStatus('2/3: Resolving ENS Names...');
       await tx1.wait(); 
 
       // Simulate bridge latency for better UX
@@ -160,9 +161,9 @@ export const Header = () => {
       // Instantiate the Payroll Contract
       const payrollContract = new ethers.Contract(ARC_PAYROLL_ADDRESS, ARC_PAYROLL_ABI, arcSigner);
 
-      // 🔍 Data Transformation: Extract from Transfer Node recipients array
+      // 🔍 Data Transformation: Extract from ENS Node recipients array
       // CustomNode.tsx defines recipients as { address: string, amount: number }
-      const recipientsData = (transferNode.data.recipients as any[]) || [];
+      const recipientsData = (ensNode.data.recipients as any[]) || [];
       const memo = transferNode.data.memo || "Salary Distribution";
 
       let targetAddresses: string[] = [];

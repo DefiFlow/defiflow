@@ -19,7 +19,7 @@ export type Recipient = {
 
 export type NodeData = {
   label: string;
-  type?: 'lifi' | 'action' | 'transfer';
+  type?: 'action' | 'transfer' | 'ens';
   active?: boolean;
 
   // Uniswap
@@ -27,13 +27,6 @@ export type NodeData = {
   output?: string;
   amount?: string | number;
   amountType?: string;
-
-  // LI.FI
-  fromChain?: string;
-  toChain?: string;
-  token?: string;
-  bridge?: string;
-  payload?: string;
 
   // Arc Payroll
   recipients?: Recipient[];

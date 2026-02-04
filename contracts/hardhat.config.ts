@@ -4,7 +4,6 @@ require("dotenv").config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY || "";
-const ARC_RPC_URL = process.env.ARC_RPC_URL || "https://rpc-testnet.arc.circle.com"; // Arc Testnet RPC URL (default official node, you can override in .env)
 
 const config: HardhatUserConfig = {
   solidity: "0.8.20",
