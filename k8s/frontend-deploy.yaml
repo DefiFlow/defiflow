@@ -18,7 +18,7 @@ spec:
       containers:
         - name: nextjs
           # 这是一个占位符，GitHub Actions 会修改它
-          image: ghcr.io/defiflow/flowstate-frontend:sha-dac7b3eb840f2177cb36f973a03a23e8259dda64
+          image: ghcr.io/defiflow/flowstate-frontend:sha-83e69bf11079575f8531f280a7f70f33fa95edd1
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
