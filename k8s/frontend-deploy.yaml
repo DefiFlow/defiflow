@@ -17,19 +17,23 @@ spec:
         - name: ghcr-secret
       containers:
         - name: nextjs
-          # 这是一个占位符，GitHub Actions 会修改它
-          image: ghcr.io/defiflow/flowstate-frontend:sha-b702dd7fbd7f8e829fe038ec6d1c706d0849b37e
+          image: ghcr.io/defiflow/flowstate-frontend:sha-dac7b3eb840f2177cb36f973a03a23e8259dda64
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
           env:
             - name: HOSTNAME
               value: "0.0.0.0"
-            - name: GEMINI_API_KEY  # 这是容器内看到的环境变量名
+            - name: GEMINI_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: my-app-secrets  # K8s 里 Secret 的名字 (第一步创建的)
-                  key: GEMINI_API_KEY   # Secret 里的键名
+                  name: my-app-secrets
+                  key: GEMINI_API_KEY
+            - name: ALCHEMY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: my-app-secrets
+                  key: ALCHEMY_API_KEY
 ---
 apiVersion: v1
 kind: Service
