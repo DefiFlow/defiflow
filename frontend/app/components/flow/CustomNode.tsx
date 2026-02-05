@@ -248,7 +248,7 @@ export const CustomNode = ({ id, data }: { id: string, data: any }) => {
         /* Transfer Node UI */
         <div className="flex flex-col gap-3">
           {parentEnsNodeRecipient ? (
-            <div className="p-3 bg-white/5 rounded-lg border border-white/10 space-y-2">
+            <div className="p-3 bg-white/5 rounded-lg border border-white/10 space-y-2 animate-in fade-in duration-300">
               <div className="flex justify-between items-center">
                 <span className="text-[10px] text-stone-400">Recipient</span>
                 <span className="font-mono text-xs text-white break-all">{parentEnsNodeRecipient.input || 'N/A'}</span>
@@ -291,6 +291,7 @@ export const CustomNode = ({ id, data }: { id: string, data: any }) => {
         position={Position.Bottom}
         className="!bg-[#0090FF] !border-2 !border-[#FFFFFF] !w-3.5 !h-3.5 !-bottom-1.5 hover:!scale-125 transition-transform"
       />
+
     </div>
   );
 };

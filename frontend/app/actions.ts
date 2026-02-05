@@ -40,7 +40,7 @@ JSON Structure Details:
     - \`id\`: \`"2-${'${i+1}'}"\`, \`type\`: "ens", \`position\`: \`{ "x": (i * 300), "y": 250 }\`
     - \`data\`: \`{ "label": "ENS Resolver", "type": "ens", "recipients": [{ "input": "...", "amount": ..., "address": "" }] }\` (recipients array has only ONE element)
   - **Payroll Node:**
-    - \`id\`: \`"3-${'${i+1}'}"\`, \`type\`: "transfer", \`position\`: \`{ "x": (i * 300), "y": 550 }\`
+    - \`id\`: \`"3-${'${i+1}'}"\`, \`type\`: "transfer", \`position\`: \`{ "x": (i * 300) + 1, "y": 550 }\`
     - \`data\`: \`{ "label": "Arc Payroll", "type": "transfer", "token": "USDC", "memo": "..." }\`
 
 - **Edges:**

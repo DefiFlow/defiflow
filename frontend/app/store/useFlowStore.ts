@@ -59,6 +59,8 @@ interface FlowState {
   isRunning: boolean;
   walletAddress: string | null;
   txHash: string | null;
+  swapHash: string | null;
+  arcHash: string | null;
   executionStep: number | null;
   executionError: string | null;
 
@@ -76,6 +78,8 @@ interface FlowState {
   setIsRunning: (isRunning: boolean) => void;
   setWalletAddress: (address: string | null) => void;
   setTxHash: (hash: string | null) => void;
+  setSwapHash: (hash: string | null) => void;
+  setArcHash: (hash: string | null) => void;
   setExecutionStep: (step: number | null) => void;
   setExecutionError: (error: string | null) => void;
   setShowSuccessModal: (show: boolean) => void;
@@ -91,6 +95,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   isRunning: false,
   walletAddress: null,
   txHash: null,
+  swapHash: null,
+  arcHash: null,
   showSuccessModal: false,
   showAIModal: false,
   executionStep: null,
@@ -117,6 +123,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   setIsRunning: (isRunning) => set({ isRunning }),
   setWalletAddress: (walletAddress) => set({ walletAddress }),
   setTxHash: (txHash) => set({ txHash }),
+  setSwapHash: (swapHash) => set({ swapHash }),
+  setArcHash: (arcHash) => set({ arcHash }),
   setShowSuccessModal: (showSuccessModal) => set({ showSuccessModal }),
   setShowAIModal: (showAIModal) => set({ showAIModal }),
   setExecutionStep: (executionStep) => set({ executionStep }),

@@ -86,6 +86,8 @@ export const Header = () => {
     setIsRunning,
     nodes,
     setTxHash,
+    setSwapHash,
+    setArcHash,
     setShowSuccessModal,
     setExecutionStep,
     setExecutionError,
@@ -225,6 +227,7 @@ export const Header = () => {
 
       const tx1: TransactionResponse = await routerContract.swap(poolKey, swapParams, "0x");
       console.log(`Swap Transaction sent: ${tx1.hash}`);
+      setSwapHash(tx1.hash);
       await tx1.wait();
       console.log("Swap Confirmed!");
 
@@ -292,6 +295,7 @@ export const Header = () => {
         memo
       );
       console.log(`Payroll Transaction sent: ${tx2.hash}`)
+      setArcHash(tx2.hash);
 
       const receipt = await tx2.wait();
 
