@@ -1,38 +1,34 @@
-import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox";
+require("@nomiclabs/hardhat-ethers");
+require("@nomiclabs/hardhat-etherscan"); // 验证插件
 require("dotenv").config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY || "";
 
-const config: HardhatUserConfig = {
+/** @type import('hardhat/config').HardhatUserConfig */
+module.exports = {
   solidity: "0.8.20",
   networks: {
-    hardhat: {
-    },
+    hardhat: {},
     localhost: {
       url: "http://127.0.0.1:8545",
     },
-    // Your original Sepolia configuration
     sepolia: {
       url: `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
       accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
     },
-    // ✅ New: Arc Testnet configuration
+    // Arc Testnet 配置
     arcTestnet: {
       url: `https://rpc.testnet.arc.network`,
-      chainId: 5042002, // Arc's ChainID
+      chainId: 5042002,
       accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
     },
   },
-  // Automatic open-source verification configuration
   etherscan: {
     apiKey: {
-      sepolia: process.env.ETHERSCAN_API_KEY || "", // Sepolia API Key
-      // Arc's explorer usually doesn't require a real Key, but a placeholder must be filled here to prevent errors
-      arcTestnetcd: "any-string-api-key"
+      sepolia: process.env.ETHERSCAN_API_KEY || "",
+      arcTestnet: "any-string-api-key"
     },
-    // ✅ New: Arc custom chain verification configuration (because Hardhat doesn't know Arc's explorer API by default)
     customChains: [
       {
         network: "arcTestnet",
@@ -45,5 +41,3 @@ const config: HardhatUserConfig = {
     ],
   },
 };
-
-export default config;
