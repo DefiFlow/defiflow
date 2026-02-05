@@ -13,11 +13,11 @@ const executionSteps = [
 ];
 
 export const SuccessModal = () => {
-    const { 
-        showSuccessModal, 
-        setShowSuccessModal, 
-        txHash, 
-        nodes, 
+    const {
+        showSuccessModal,
+        setShowSuccessModal,
+        txHash,
+        nodes,
         isRunning,
         executionStep,
         executionError
@@ -48,13 +48,13 @@ export const SuccessModal = () => {
                 {/* Header: Changes based on state (executing, success, error) */}
                 <div className="flex flex-col items-center mb-8">
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-6 
-                        ${isComplete ? 'bg-[#00E676] shadow-[0_0_20px_rgba(0,230,118,0.3)]' : 
-                          executionError ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]' :
-                          'bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]'}`
+                        ${isComplete ? 'bg-[#00E676] shadow-[0_0_20px_rgba(0,230,118,0.3)]' :
+                            executionError ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]' :
+                                'bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]'}`
                     }>
-                        {isComplete ? <CheckCircle2 className="w-7 h-7 text-white" /> : 
-                         executionError ? <AlertTriangle className="w-7 h-7 text-white" /> :
-                         <Loader2 className="w-7 h-7 text-white animate-spin" />}
+                        {isComplete ? <CheckCircle2 className="w-7 h-7 text-white" /> :
+                            executionError ? <AlertTriangle className="w-7 h-7 text-white" /> :
+                                <Loader2 className="w-7 h-7 text-white animate-spin" />}
                     </div>
                     <h2 className="text-2xl font-bold text-white tracking-tight">
                         {isComplete ? 'Transfer Successful' : executionError ? 'Execution Failed' : 'Agent Executing'}
@@ -83,16 +83,16 @@ export const SuccessModal = () => {
                 {!isComplete && !executionError && (
                     <div className="space-y-4 mb-10 ml-1">
                         {executionSteps.map((step, index) => (
-                            <div key={index} className="flex items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${index * 100}ms`}}>
+                            <div key={index} className="flex items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
                                 <div className={`flex items-center justify-center w-5 h-5 rounded-full transition-colors duration-300
                                     ${index < (executionStep || 0) ? 'bg-green-500 text-white' :
-                                      index === (executionStep || 0) ? 'bg-blue-500 text-white' :
-                                      'bg-stone-700 text-stone-400'
+                                        index === (executionStep || 0) ? 'bg-blue-500 text-white' :
+                                            'bg-stone-700 text-stone-400'
                                     }`
                                 }>
                                     {index < (executionStep || 0) ? <CheckCircle2 className="w-3.5 h-3.5" /> :
-                                     index === (executionStep || 0) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> :
-                                     <Circle className="w-3.5 h-3.5" />}
+                                        index === (executionStep || 0) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> :
+                                            <Circle className="w-3.5 h-3.5" />}
                                 </div>
                                 <span className={`text-sm font-bold transition-colors duration-300
                                     ${index <= (executionStep || 0) ? 'text-white' : 'text-stone-500'}`
@@ -138,6 +138,6 @@ export const SuccessModal = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };

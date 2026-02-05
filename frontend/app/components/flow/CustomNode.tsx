@@ -30,36 +30,39 @@ const RecipientRow = ({
   const [isResolving, setIsResolving] = useState(false);
   const [isValid, setIsValid] = useState(isValidAddress(recipient.address || ''));
 
+  // Only sync if the recipient.input changes from outside (e.g. AI generation)
   useEffect(() => {
-    if (recipient.input && recipient.input !== localInput) {
+    if (recipient.input !== undefined && recipient.input !== localInput) {
       setLocalInput(recipient.input);
+      setIsValid(isValidAddress(recipient.address || ''));
     }
   }, [recipient.input]);
 
-  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setLocalInput(val);
     onChange(index, 'input', val);
 
+    // Debounced or immediate resolution? Let's keep it immediate for now but with proper checks
     if (isEnsName(val)) {
       setIsValid(false);
       setIsResolving(true);
-      try {
-        const provider = getEnsProvider();
-        const addr = provider ? await provider.resolveName(val) : null;
-        console.log(addr)
-        if (addr) {
-          onChange(index, 'address', addr);
-          setIsValid(true);
-        } else {
+      const provider = getEnsProvider();
+      if (provider) {
+        provider.resolveName(val).then(addr => {
+          if (addr) {
+            onChange(index, 'address', addr);
+            setIsValid(true);
+          } else {
+            onChange(index, 'address', '');
+            setIsValid(false);
+          }
+          setIsResolving(false);
+        }).catch(() => {
           onChange(index, 'address', '');
           setIsValid(false);
-        }
-      } catch {
-        onChange(index, 'address', '');
-        setIsValid(false);
-      } finally {
-        setIsResolving(false);
+          setIsResolving(false);
+        });
       }
     } else if (isValidAddress(val)) {
       onChange(index, 'address', val);
@@ -103,7 +106,7 @@ const RecipientRow = ({
 };
 
 export const CustomNode = ({ id, data }: { id: string, data: any }) => {
-  const { updateNodeData } = useReactFlow();
+  const updateNodeData = useFlowStore((state) => state.updateNodeData);
   const nodes = useNodes();
   const edges = useEdges();
   const currentPrice = useFlowStore((state) => state.currentPrice);
@@ -131,7 +134,7 @@ export const CustomNode = ({ id, data }: { id: string, data: any }) => {
   }, [id, data.type, nodes, edges]);
 
   const handleChange = (field: string, value: string) => {
-    updateNodeData(id, { ...data, [field]: value });
+    updateNodeData(id, { [field]: value });
   };
 
   const recipients = Array.isArray(data.recipients) ? data.recipients : [];
@@ -139,8 +142,9 @@ export const CustomNode = ({ id, data }: { id: string, data: any }) => {
   const updateRecipient = useCallback((index: number, field: string, value: any) => {
     const newRecipients = [...recipients];
     newRecipients[index] = { ...newRecipients[index], [field]: value };
-    updateNodeData(id, { ...data, recipients: newRecipients });
-  }, [id, data, recipients, updateNodeData]);
+    updateNodeData(id, { recipients: newRecipients });
+  }, [id, recipients, updateNodeData]);
+
 
   const getTypeStyles = () => {
     switch (data.type) {

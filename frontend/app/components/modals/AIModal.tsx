@@ -28,22 +28,42 @@ export const AIModal = () => {
         setThoughtText("");
 
         try {
+            // --- MOCK DATA FOR DEBUGGING ---
+            /*
+            const mockResult = {
+                thought: "I've processed your request. I will initiate a swap for the specified assets on Uniswap, then resolve the ENS name 'vitalik.eth' to get the target address, and finally set up the payroll distribution on the Arc Testnet as requested.",
+                error: null,
+                nodes: [
+                    { id: 'node-1', type: 'custom', position: { x: 100, y: 100 }, data: { type: 'action', label: 'Uniswap Swap', input: '1' } },
+                    { id: 'node-2', type: 'custom', position: { x: 100, y: 350 }, data: { type: 'ens', label: 'ENS Resolver', recipients: [{ address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', amount: 10, input: 'vitalik.eth' }] } },
+                    { id: 'node-3', type: 'custom', position: { x: 100, y: 600 }, data: { type: 'transfer', label: 'Arc Payroll', memo: 'Debug Mock Reward' } },
+                ],
+                edges: [
+                    { id: 'e1-2', source: 'node-1', target: 'node-2', animated: true },
+                    { id: 'e2-3', source: 'node-2', target: 'node-3', animated: true },
+                ]
+            };
+            */
+
+            // Simulation delay to see UI animations
+            // await new Promise(r => setTimeout(r, 800));
+            // const result = mockResult; 
             const result = await analyzeIntent(intent, currentPrice);
+            // ------------------------------
 
             if (result && !result.error) {
-                // Display thoughts without typewriter effect (Step 0)
+                // Typwriter Effect for AI Thoughts
                 const rawThoughts = result.thought || "Processing request...";
-                const sentences = rawThoughts.match(/[^.!?]+[.!?]+/g) || [rawThoughts];
+                setThoughtText("");
 
-                for (const sentence of sentences) {
-                    const text = sentence.trim();
-                    if (!text) continue;
-
-                    // Directly set thought text to trigger fade-in-up animation
-                    setThoughtText(text);
-                    // Wait for reading - giving enough time to admire the animation
-                    await new Promise(r => setTimeout(r, 2500));
+                let currentText = "";
+                for (let i = 0; i < rawThoughts.length; i++) {
+                    currentText += rawThoughts[i];
+                    setThoughtText(currentText);
+                    await new Promise(r => setTimeout(r, 20)); // Adjust speed (20ms per char)
                 }
+
+                await new Promise(r => setTimeout(r, 1500));
 
                 // Proceed to next steps
                 setStep(1);
@@ -54,9 +74,6 @@ export const AIModal = () => {
                 await new Promise(r => setTimeout(r, 800));
 
                 // Finish - Call the callback passed via props or store
-                // Since we are decoupling, we might need to pass the result back to the main component
-                // or update the store directly here.
-                // Let's update the store directly.
                 updateFlowFromAI(result);
                 onClose();
             } else {
@@ -92,8 +109,8 @@ export const AIModal = () => {
                     <X className="w-5 h-5" />
                 </button>
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="bg-white/20 p-2 rounded-full">
-                        <Sparkles className="w-5 h-5 text-white" />
+                    <div className="overflow-hidden flex items-center justify-center">
+                        <img src="/AIB.png" alt="AI Builder" className="w-7 h-7 object-contain" />
                     </div>
                     <h2 className="text-xl font-bold text-white">AI Agent Builder</h2>
                 </div>
@@ -103,30 +120,28 @@ export const AIModal = () => {
                         {steps.map((s, i) => (
                             <div key={i} className="flex flex-col gap-1">
                                 <div className="flex items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-500">
-                                    <div className={`p-1 rounded-full transition-colors duration-300 ${i < step ? 'bg-green-100 text-green-600' :
-                                        i === step ? 'bg-white/30 text-white' :
-                                            'bg-white/10 text-white/40'
+                                    <div className={`rounded-full transition-colors duration-300 ${i < step ? 'p-0' :
+                                        i === step ? 'bg-white/30 text-white p-1' :
+                                            'bg-white/10 text-white/40 p-1'
                                         }`}>
-                                        {i < step ? <Check className="w-4 h-4" /> :
+                                        {i < step ? <img src="/success_icon.png" alt="Done" className="w-5 h-5 object-contain" /> :
                                             i === step ? <Loader2 className="w-4 h-4 animate-spin" /> :
                                                 <Circle className="w-4 h-4" />}
                                     </div>
                                     <span className={`text-sm transition-colors duration-300 ${i <= step ? 'text-white font-medium' : 'text-white/50'
                                         }`}>{s}</span>
                                 </div>
-                                {/* Gemini-style Thought Display (Step 0) */}
+                                {/* Typwriter Thought Display (Step 0) */}
                                 {i === 0 && step === 0 && (
-                                    <div className="ml-9 min-h-[3rem] relative overflow-hidden">
-                                        <div key={thoughtText} className="text-xs font-mono leading-relaxed animate-in slide-in-from-bottom-2 duration-500 fill-mode-forwards">
-                                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-white font-bold mr-2">AI:</span>
-                                            <span
-                                                className="bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-transparent animate-text-shimmer"
-                                            >
+                                    <div className="ml-9 p-4 bg-[#00000033] rounded-xl border border-white/10 min-h-[80px] relative overflow-hidden mt-1 shadow-inner">
+                                        <div className="text-[11px] font-mono leading-relaxed">
+                                            <span className="text-purple-400 font-bold mr-2">AI :</span>
+                                            <span className="text-white/90">
                                                 {thoughtText}
                                             </span>
                                         </div>
                                         {/* Gemini-style shimmering loading bar */}
-                                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent opacity-50 animate-shimmer" style={{ backgroundSize: '200% 100%' }}></div>
+                                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-300 to-transparent opacity-30 animate-shimmer" style={{ backgroundSize: '200% 100%' }}></div>
                                     </div>
                                 )}
                             </div>
@@ -139,7 +154,7 @@ export const AIModal = () => {
                         </p>
                         <textarea
                             className="w-full border border-white/20 rounded-lg p-3 text-sm focus:outline-none focus:border-white/40 min-h-[100px] mb-4 resize-none text-white placeholder-white/50"
-                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                            style={{ backgroundColor: '#00000033' }}
                             placeholder="e.g. Swap 1 ETH to USDC, resolve vitalik.eth, and pay salary on Arc..."
                             value={intent}
                             onChange={(e) => setIntent(e.target.value)}
@@ -154,7 +169,6 @@ export const AIModal = () => {
                                 opacity: intent.trim() ? 1 : 0.5
                             }}
                         >
-                            <BrainCircuit className="w-4 h-4" />
                             Generate Workflow
                         </button>
                     </>
