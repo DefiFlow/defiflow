@@ -1,9 +1,11 @@
 // app/components/flow/CustomNode.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Handle, Position, useReactFlow, useNodes, useEdges } from '@xyflow/react';
+import { Handle, Position, useNodes, useEdges } from '@xyflow/react';
 import { Repeat, ArrowRight, CheckCircle, Wallet, Loader2, Search } from 'lucide-react';
 import { ethers } from 'ethers';
 import { useFlowStore } from '../../store/useFlowStore';
+import { useUniswapV4 } from '../../hooks/UseUniswapV4';
+import { useDebounce } from 'use-debounce';
 
 const isValidAddress = (addr: string) => /^0x[a-fA-F0-9]{40}$/.test(addr);
 const isEnsName = (name: string) => name.endsWith('.eth');
@@ -117,18 +119,41 @@ export const CustomNode = ({ id, data }: { id: string, data: any }) => {
   const updateNodeData = useFlowStore((state) => state.updateNodeData);
   const nodes = useNodes();
   const edges = useEdges();
-  const currentPrice = useFlowStore((state) => state.currentPrice);
+
+  // State for on-chain quoting
+  const [isQuoting, setIsQuoting] = useState(false);
+  // We don't need a signer for quoting, so we pass null.
+  const { quoteReverse } = useUniswapV4(null);
+  // Debounce input to prevent spamming RPC on every keystroke
+  const [debouncedInput] = useDebounce(data.input, 500);
 
   useEffect(() => {
     if (data.type === 'action') {
-      const amount = parseFloat(data.input || '0');
-      if (!isNaN(amount) && currentPrice > 0) {
-        const calculated = amount * currentPrice;
-        const formatted = `~${calculated.toLocaleString('en-US', { maximumFractionDigits: 0 })} USDC`;
-        if (data.output !== formatted) updateNodeData(id, { output: formatted });
-      }
+      const getQuote = async () => {
+        const amount = parseFloat(String(debouncedInput || '0').replace(/[^0-9.]/g, ''));
+        if (isNaN(amount) || amount <= 0) {
+          updateNodeData(id, { output: '' }); // Clear output if input is invalid
+          return;
+        }
+
+        setIsQuoting(true);
+        try {
+          const requiredEth = await quoteReverse(String(amount));
+          if (requiredEth) {
+            const formatted = `~${parseFloat(requiredEth).toLocaleString('en-US', { maximumFractionDigits: 5 })} mETH`;
+            updateNodeData(id, { output: formatted });
+          }
+        } catch (e) {
+          console.error("Quote failed:", e);
+          updateNodeData(id, { output: 'Error fetching quote' });
+        } finally {
+          setIsQuoting(false);
+        }
+      };
+
+      getQuote();
     }
-  }, [data.input, currentPrice, data.type, id, updateNodeData, data.output]);
+  }, [debouncedInput, data.type, id, updateNodeData, quoteReverse]);
 
   const parentEnsNodeRecipient = useMemo(() => {
     if (data.type !== 'transfer') return null;
@@ -232,24 +257,25 @@ export const CustomNode = ({ id, data }: { id: string, data: any }) => {
       ) : data.type === 'action' ? (
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-[9px] font-bold text-stone-500 uppercase tracking-tighter">Input (mETH)</label>
+            <label className="text-[9px] font-bold text-stone-500 uppercase tracking-tighter">Input (mUSDC)</label>
             <input
               type="text"
               className="nodrag w-full border border-white/10 rounded-lg px-3 py-2 text-xs text-white bg-white/10 focus:outline-none focus:border-pink-500 font-mono"
-              placeholder="10 ETH (Sepolia)"
+              placeholder="2000 mUSDC"
               value={data.input || ''}
               onChange={(e) => handleChange('input', e.target.value)}
             />
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[9px] font-bold text-stone-500 uppercase tracking-tighter">Output (mUSDC)</label>
+          <div className="flex flex-col gap-1 relative">
+            <label className="text-[9px] font-bold text-stone-500 uppercase tracking-tighter">Output (mETH)</label>
             <input
               type="text"
-              className="nodrag w-full border border-black/10 rounded-lg px-3 py-2 text-xs text-white bg-black/10 focus:outline-none font-mono"
-              placeholder="~28,000 USDC"
-              value={data.output || ''}
+              className="nodrag w-full border border-black/20 rounded-lg px-3 py-2 text-xs text-white bg-black/20 focus:outline-none font-mono"
+              placeholder="~1.00 mETH (Sepolia)"
+              value={isQuoting ? 'Fetching quote...' : data.output || ''}
               readOnly
             />
+            {isQuoting && <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-blue-500 animate-spin" />}
           </div>
         </div>
       ) : (

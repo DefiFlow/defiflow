@@ -26,8 +26,10 @@ export const SuccessModal = () => {
 
     // Extract details from the nodes
     const actionNode = nodes.find(n => (n.data as any)?.type === 'action');
-    const amount = actionNode?.data?.input?.replace(/[^0-9.]/g, '') || '0';
-    const fromToken = 'ETH';
+    // The amount swapped is the ETH amount, which is in the output field of the action node.
+    // The input field contains the target USDC amount.
+    const amount = actionNode?.data?.output?.replace(/[^0-9.]/g, '') || '0';
+    const fromToken = 'mETH';
 
     const ensNodes = nodes.filter(n => n.type === 'ens' || n.data?.type === 'ens');
     const recipientsCount = ensNodes.reduce((acc, node) => acc + (Array.isArray(node.data.recipients) ? node.data.recipients.length : 0), 0);

@@ -15,13 +15,12 @@ export async function analyzeIntent(intent: string, currentPrice: number) {
 
 Context:
 - User Intent: "${intent}"
-- Current ETH Price: ${currentPrice} USD per ETH. Use this for any calculations involving ETH to USDC swaps.
 
 Task:
-1.  **Think Step-by-Step**: First, formulate a brief "thought" process explaining the steps you will take. For example: "I will initiate a swap for the specified assets, then resolve the ENS names, and finally set up the payroll distribution."
+1.  **Think Step-by-Step**: First, formulate a brief "thought" process explaining the steps you will take. For example: "I will calculate the total USDC needed, resolve ENS names, and then set up the payroll distribution. The required ETH for the swap will be calculated on the frontend."
 2.  **Parse Intent**: Analyze the user's intent to extract key parameters like recipients, amounts, and a memo.
-3.  **Calculate Totals**: Calculate the total USDC amount required.
-4.  **Generate JSON**: Construct a single JSON object that includes your "thought" process and the necessary nodes and edges for the React Flow diagram.
+3.  **Calculate Total USDC**: Calculate only the total USDC amount required from the user's intent. Do not calculate the ETH amount.
+4.  **Generate JSON**: Construct a single JSON object that includes your "thought" process and the necessary nodes and edges for the React Flow diagram. The frontend will handle the ETH calculation.
 
 JSON Structure Specification:
 
@@ -32,10 +31,11 @@ JSON Structure Specification:
 
 JSON Structure Details:
 
-- **One Swap Node:**
+- **One Swap Node (for ETH to USDC):**
   - \`id\`: "1", \`type\`: "action", \`position\`: \`{ "x": 250, "y": 0 }\`
-  - \`data\`: \`{ "label": "Uniswap", "type": "action", "input": "...", "output": "..." }\` 
-    - The 'input' should be the total USDC amount calculated. The 'output' should be an empty string.
+  - \`data\`: \`{ "label": "Uniswap", "type": "action", "input": "...", "output": "..." }\`
+    - The \`input\` should be the total USDC amount required (as a string, e.g., "2000").
+    - The \`output\` must be an empty string \`""\`. The frontend will calculate this value.
 
 - **For EACH recipient \`i\`:**
   - **ENS Node:**

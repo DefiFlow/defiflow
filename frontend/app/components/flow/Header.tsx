@@ -177,9 +177,10 @@ export const Header = () => {
       const signer = await provider.getSigner();
       const userAddress = await signer.getAddress();
 
-      // Input from Flow Node
-      const inputVal = actionNode.data.input || "0.001"; // Default to safe value
-      const cleanInput = inputVal.toString().replace(/[^0-9.]/g, '');
+      // The 'output' field of the action node now holds the calculated ETH amount needed for the swap.
+      // The 'input' field holds the target USDC amount.
+      const outputVal = actionNode.data.output || "~0.001"; // Default to safe value
+      const cleanInput = outputVal.toString().replace(/[^0-9.]/g, '');
       const amountIn = cleanInput || "0.001";
       
       // Tokens
