@@ -17,7 +17,7 @@ spec:
         - name: ghcr-secret
       containers:
         - name: nextjs
-          image: ghcr.io/defiflow/flowstate-frontend:sha-8d914fd1b25fd425fb30ffd9d6447aaf462a4912
+          image: ghcr.io/defiflow/flowstate-frontend:sha-f6fe98faf7f743daddfda63e343be07dda2da800
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
