@@ -10,7 +10,6 @@ import { useDebounce } from 'use-debounce';
 const isValidAddress = (addr: string) => /^0x[a-fA-F0-9]{40}$/.test(addr);
 const isEnsName = (name: string) => name.endsWith('.eth');
 
-// 使用懒加载初始化 Provider，避免 SSR 期间因相对路径报错
 let ensProvider: ethers.providers.JsonRpcProvider | null = null;
 const getEnsProvider = () => {
   if (!ensProvider && typeof window !== 'undefined') {
