@@ -95,6 +95,8 @@ export const Header = () => {
     setIsRunning,
     nodes,
     setTxHash,
+    setSwapHash,
+    setArcHash,
     setShowSuccessModal,
     setExecutionStep,
     setExecutionError,
@@ -247,6 +249,7 @@ export const Header = () => {
       );
 
       console.log(`Swap Transaction sent: ${tx1.hash}`);
+      setSwapHash(tx1.hash);
       await tx1.wait();
       console.log("✅ Swap Confirmed on-chain!");
 
@@ -312,7 +315,8 @@ export const Header = () => {
         targetAmounts,
         memo
       );
-      console.log(`Payroll Tx: ${tx2.hash}`);
+      console.log(`Payroll Transaction sent: ${tx2.hash}`)
+      setArcHash(tx2.hash);
 
       const receipt = await tx2.wait();
 

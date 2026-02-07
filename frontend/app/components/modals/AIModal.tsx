@@ -1,12 +1,13 @@
 // app/components/modals/AIModal.tsx
 import React, { useState } from 'react';
 import { X, Sparkles, Check, Circle, Loader2, BrainCircuit } from 'lucide-react';
-import { MarkerType } from '@xyflow/react';
+import { MarkerType, useReactFlow } from '@xyflow/react';
 import { useFlowStore } from '../../store/useFlowStore';
 import { analyzeIntent } from '../../actions';
 
 export const AIModal = () => {
     const { setShowAIModal, setNodes, setEdges, currentPrice } = useFlowStore();
+    const { fitView } = useReactFlow();
     const onClose = () => setShowAIModal(false);
 
     const [intent, setIntent] = useState('');
@@ -89,13 +90,20 @@ export const AIModal = () => {
 
     const updateFlowFromAI = (result: any) => {
         if (result.nodes && result.edges) {
-            // Ensure all nodes use the 'custom' type to match FlowBuilder configuration
             const formattedNodes = result.nodes.map((node: any) => ({
                 ...node,
                 type: 'custom'
             }));
-            setNodes(formattedNodes);
+
+            // 1. Set edges first
+            // When nodes mount, they will immediately sense these edges and 
+            // render their final (expanded) height from the very first frame.
             setEdges(result.edges);
+
+            // 2. Set nodes in the next tick to ensure edges are in the store
+            setTimeout(() => {
+                setNodes(formattedNodes);
+            }, 0);
         }
     };
 
